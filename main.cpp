@@ -10,13 +10,17 @@
 #define RAD_TO_DEG 57.295779513082320876798154814105
 #endif
 
-#define ACCURACY 0.0001
+#define ACCURACY 0.001
 #define B_OFFSET_PERCENT 1.4 // + 40%
 #define str(x) std::to_string(x)
 
 double x(double theta);
 double y(double theta);
+double xP(double theta);
+double yP(double theta);
 double distance(double theta, double delta);
+double f(double delta, double theta, double dist);
+double fP(double delta, double theta, double dist);
 double bCalc(double h);
 double distCalc(double w, double t);
 double zOffsetCalc(double l, double t);
@@ -31,10 +35,10 @@ double lessThicness = 1.1;
 
 double a = width;
 double b = bCalc(height);
-int numX = 500;
-int numY = 10;
-double dist = distCalc(width, moreThicness);
-double dist2 = secondLayerDist(width, moreThicness) - 2;
+int numX = 100;
+int numY = 5;
+double dist = distCalc(width, moreThicness) + 2;
+double dist2 = secondLayerDist(width, moreThicness) + 2;
 double zOffset = zOffsetCalc(lenght, moreThicness) - 0.5;
 
 // ----------------------------------------------------------------------------------------------------------------------------------
@@ -50,11 +54,17 @@ int main() {
     double currTheta = 0;
     Vector3 point(x(currTheta), y(currTheta), 0);
     points.push_back(point);
+    double lastRightDeltaThetaOdd = 1;
+    double lastRightDeltaThetaEven = 1;
     for (int i = 0; i < numX * 2; i++) {
-        double deltaTheta = 0;
+        double deltaTheta = (i % 2 == 0 ? lastRightDeltaThetaEven : lastRightDeltaThetaOdd);
         double distan = (i % 2 == 0 ? dist2 : dist);
-        while (distance(currTheta, deltaTheta) <= distan)
-            deltaTheta += ACCURACY;
+        double lastDeltaTheta = -100;
+        while (absolute(deltaTheta - lastDeltaTheta) > ACCURACY) {
+            lastDeltaTheta = deltaTheta;
+            deltaTheta -= f(deltaTheta, currTheta, dist) / fP(deltaTheta, currTheta, dist);
+        }
+        (i % 2 == 0 ? lastRightDeltaThetaEven : lastRightDeltaThetaOdd) = deltaTheta;
         currTheta += deltaTheta;
 
         point = Vector3(x(currTheta), y(currTheta), 0);
@@ -78,7 +88,6 @@ int main() {
         }
         chainmail.addPolygons(&chainLinkDuplicate.polygons);
     }
-
     chainmail.writeFile();
 }
 
@@ -88,8 +97,20 @@ double x(double theta) {
 double y(double theta) {
     return (a + b * theta)*std::sin(DEG_TO_RAD * theta);
 }
+double xP(double theta) {
+    return b * std::cos(DEG_TO_RAD * theta) - (a + b * theta) * std::sin(DEG_TO_RAD * theta);
+}
+double yP(double theta) {
+    return b * std::sin(DEG_TO_RAD * theta) + (a + b * theta) * std::cos(DEG_TO_RAD * theta);
+}
 double distance(double theta, double delta) {
     return std::sqrt(pow(x(theta + delta) - x(theta), 2)+ pow(y(theta + delta) - y(theta), 2));
+}
+double f(double delta, double theta, double dist) {
+    return std::sqrt(pow(x(theta + delta) - x(theta), 2)+ pow(y(theta + delta) - y(theta), 2)) - dist;
+}
+double fP(double delta, double theta, double dist) {
+    return (xP(theta + delta)*(x(theta + delta) - x(theta)) + yP(theta + delta)*(y(theta + delta) - y(theta)))/(std::sqrt(pow(x(theta + delta) - x(theta), 2)+ pow(y(theta + delta) - y(theta), 2)));
 }
 double bCalc(double h) {
     return (h / 360) * B_OFFSET_PERCENT;
