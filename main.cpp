@@ -12,34 +12,32 @@
 
 #define ACCURACY 0.001
 #define B_OFFSET_PERCENT 1.4 // + 40%
-#define str(x) std::to_string(x)
+#define str(var) std::to_string(var)
 
 double x(double theta);
 double y(double theta);
-double xP(double theta);
-double yP(double theta);
+double xP(double theta); // P is prime (the derivative)
+double yP(double theta); // P is prime (the derivative)
 double distance(double theta, double delta);
 double f(double delta, double theta, double dist);
-double fP(double delta, double theta, double dist);
+double fP(double delta, double theta, double dist); // P is prime (the derivative)
 double bCalc(double h);
 double distCalc(double w, double t);
 double zOffsetCalc(double l, double t);
-double secondLayerDist(double w, double t);
 
 double height = 4;
 double width = 12;
 double lenght = 12;
-double thicness = 1.5;
-double moreThicness = 2;
-double lessThicness = 1.1;
+double thickness = 1.5;
+double mainThickness = 2;
+double lessThickness = 1.1;
 
 double a = width;
 double b = bCalc(height);
 int numX = 100;
 int numY = 5;
-double dist = distCalc(width, moreThicness) + 2;
-double dist2 = secondLayerDist(width, moreThicness) + 2;
-double zOffset = zOffsetCalc(lenght, moreThicness) - 0.5;
+double dist = distCalc(width, mainThickness); // don't know why but 7 seems to look better for this and zOffset
+double zOffset = zOffsetCalc(lenght, mainThickness);
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 // The generated model has NOT YET BEEN TESTED, so it only works in theory and in fusion (by spliting it by separate).
@@ -54,17 +52,15 @@ int main() {
     double currTheta = 0;
     Vector3 point(x(currTheta), y(currTheta), 0);
     points.push_back(point);
-    double lastRightDeltaThetaOdd = 1;
-    double lastRightDeltaThetaEven = 1;
+    double lastRightDeltaTheta = 1;
     for (int i = 0; i < numX * 2; i++) {
-        double deltaTheta = (i % 2 == 0 ? lastRightDeltaThetaEven : lastRightDeltaThetaOdd);
-        double distan = (i % 2 == 0 ? dist2 : dist);
+        double deltaTheta = lastRightDeltaTheta;
         double lastDeltaTheta = -100;
         while (absolute(deltaTheta - lastDeltaTheta) > ACCURACY) {
             lastDeltaTheta = deltaTheta;
             deltaTheta -= f(deltaTheta, currTheta, dist) / fP(deltaTheta, currTheta, dist);
         }
-        (i % 2 == 0 ? lastRightDeltaThetaEven : lastRightDeltaThetaOdd) = deltaTheta;
+        lastRightDeltaTheta = deltaTheta;
         currTheta += deltaTheta;
 
         point = Vector3(x(currTheta), y(currTheta), 0);
@@ -116,11 +112,8 @@ double bCalc(double h) {
     return (h / 360) * B_OFFSET_PERCENT;
 }
 double distCalc(double w, double t) {
-    return (w - t) / 2;
+    return (3.0/4.0) * (w - t);
 }
 double zOffsetCalc(double l, double t) {
-    return l - 2*t;
-}
-double secondLayerDist(double w, double t) {
-    return w - t;
+    return (3.0/4.0) * (l - t);
 }

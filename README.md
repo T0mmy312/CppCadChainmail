@@ -5,3 +5,8 @@ The goal is to make the moast space efficient chainmail for SLS printing.
 FDM printing is theoretically possible, but not recomended because of the large amounts of supports needed for the floating chainlinks.  
 
 There is also a general modeling class for c++ included and some vector calculation tools from my 3d renderer Project.
+
+## Dimentions
+
+![alt text](fotos/FrontViewDimentions.png)
+![alt text](fotos/SideViewDimentions.png)
