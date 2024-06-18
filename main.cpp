@@ -32,7 +32,7 @@ double thickness = 1.5;
 double mainThickness = 2;
 double lessThickness = 1.1;
 
-double a = width;
+double a = 20;
 double b = bCalc(height);
 int numX = 100;
 int numY = 5;
@@ -44,7 +44,7 @@ double zOffset = zOffsetCalc(lenght, mainThickness);
 // ----------------------------------------------------------------------------------------------------------------------------------
 
 int main() {
-    model chainLink = loadModelAscii("models/chainlink.stl", "unused", "chainlink");
+    model chainLink = loadModelAscii("models/ThickChainlink.stl", "unused", "chainlink");
     chainLink.avrPosToZero();
     model chainmail("models/chainmailOutput.stl", "chainmail");
 
@@ -70,7 +70,7 @@ int main() {
             pos.z = zOffset;
         
         model chainLinkDuplicate = duplicate(&chainLink);
-        double angle = -RAD_TO_DEG * std::atan2(point.y - points[i].y, point.x - points[i].x) + 90;
+        double angle = -RAD_TO_DEG * std::atan2(point.y - points[i].y, point.x - points[i].x);
         chainLinkDuplicate.moveTo(pos);
         chainLinkDuplicate.rotate(Vector3(0, 0, 1), angle);
 

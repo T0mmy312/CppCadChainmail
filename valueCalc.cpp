@@ -34,7 +34,7 @@ double dist = distCalc(width, moreThicness);
 double dist2 = secondLayerDist(width, moreThicness) - 2; // This - 2 is adjusting for some calculation errors I haven't fixed
 double zOffset = zOffsetCalc(lenght, moreThicness) - 0.5; // this - 0.5 too (its just temporary bad code)
 
-double radiusBegin = 12;
+double radiusBegin = 20;
 double radiusEnd = 110;
 double spuleHeight = 240;
 
